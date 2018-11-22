@@ -105,7 +105,8 @@ var bookFlip = {
 	load: function(views){
 		var arr = [];
 		var page = PDFViewerApplication.page;
-		for (var i = Math.max(page - 4,0), ii = Math.min(page + 3, views.length); i < ii; i++) {
+		var limit = (this._spread === 0) ? 1 : 2;
+		for (var i = Math.max(page - limit - 1,0), ii = Math.min(page + limit, views.length); i < ii; i++) {
 			arr.push({
 				id: views[i].id,
 				x: views[i].div.offsetLeft + views[i].div.clientLeft,

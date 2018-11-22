@@ -1,3 +1,7 @@
 .bookViewer{
-	margin:5px auto 0 auto;   
+	margin: 5px auto 0 auto;   
+}
+
+.bookViewer .page{
+	background: #FFF;
 }

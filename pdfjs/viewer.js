@@ -3176,7 +3176,7 @@ function getVisibleElements(scrollEl, views) {
   var percentVisible = void 0;
   
   //%FB: get current page, 2 pages before and 2 pages after (need different handling)
-  if(bookFlip.active){
+  if(bookFlip.active && scrollEl.id=='viewerContainer'){
     visible = bookFlip.load(views);
   }else{
     var firstVisibleElementInd = views.length === 0 ? 0 : binarySearchFirstItem(views, horizontal ? isElementRightAfterViewLeft : isElementBottomAfterViewTop);
