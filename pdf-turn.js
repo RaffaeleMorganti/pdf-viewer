@@ -9,10 +9,10 @@ var bookFlip = {
 	_width: NaN,	//flipbook width
 	_height: NaN,	//flipbook height
 	active: false,	//flipbook mode on
-    _spread: NaN,	//spread page mode
+	_spread: NaN,	//spread page mode
 	ready: false,	//libs correctly loaded
 	_parity: false,	//virtual page for odd spread
-    
+
 	// load required script
 	init: function () {
 		if (Modernizr.csstransforms) {
@@ -26,7 +26,7 @@ var bookFlip = {
 					bookFlip.ready = true;
 				});
 		}
-    },
+	},
 	// startup flipbook
 	start: function(){
 		if(!this.ready || this.active)return;
