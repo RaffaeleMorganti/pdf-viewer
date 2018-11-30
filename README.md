@@ -32,9 +32,6 @@ To help you to understand how it works here a list of modified files in order to
 Other files come directly from other source without any edit. Please note that all minified code was not modified. External libraries files not used were deleted to make the source slimmer and clearer.  
 
 ## Known bugs
-* __Current view__ doesn't work properly in __Book Flip__ mode
-* __Document Outline__ links doesn't work properly in __Book Flip__ mode
-* PDF internal anchors doesn't work properly in __Book Flip__ mode
 * __Book Flip__ mode doesn't work properly with PDF with pages of different sizes
 
 ## License

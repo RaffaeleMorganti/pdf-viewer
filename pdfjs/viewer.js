@@ -9191,6 +9191,12 @@ var BaseViewer = function () {
         });
         return;
       }
+      //%FB: bookflip need different handling for internal links
+      if(bookFlip.active){
+        this._setCurrentPageNumber(pageNumber);
+        return;
+      }
+    
       var boundingRect = [pageView.viewport.convertToViewportPoint(x, y), pageView.viewport.convertToViewportPoint(x + width, y + height)];
       var left = Math.min(boundingRect[0][0], boundingRect[1][0]);
       var top = Math.min(boundingRect[0][1], boundingRect[1][1]);
@@ -9219,7 +9225,9 @@ var BaseViewer = function () {
       var currentScale = this._currentScale;
       var currentScaleValue = this._currentScaleValue;
       var normalizedScaleValue = parseFloat(currentScaleValue) === currentScale ? Math.round(currentScale * 10000) / 100 : currentScaleValue;
-      var pageNumber = firstPage.id;
+      //%FB: Fix page number in bookflip mode
+      var pageNumber = (bookFlip.active) ? this._currentPageNumber : firstPage.id;
+    
       var pdfOpenParams = '#page=' + pageNumber;
       pdfOpenParams += '&zoom=' + normalizedScaleValue;
       var currentPageView = this._pages[pageNumber - 1];
@@ -10822,7 +10830,7 @@ var SecondaryToolbar = function () {
     value: function setPageNumber(pageNumber) {
       this.pageNumber = pageNumber;
       this._updateUIState();
-	  //%FB: page changed need page turn
+      //%FB: page changed need page turn
       bookFlip.flip();
     }
   }, {
