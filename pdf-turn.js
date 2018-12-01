@@ -89,6 +89,12 @@ var bookFlip = {
 		var scale = PDFViewerApplication.pdfViewer.currentScale;
 		$('#viewer').turn('size', this._width * this._spreadMult() * scale, this._height * scale);
 	},
+	// rotate flipbook pages
+	rotate: function(){
+		if(!this.active)return;
+		[this._height, this._width] = [this._width, this._height];
+		this.resize();
+	},
 	// change flipbook spread mode
 	spread: function(spreadMode){
 		if(!this.active)return;

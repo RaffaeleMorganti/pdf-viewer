@@ -32,6 +32,7 @@ Other files come directly from specified source without any edit. External libra
 
 ## Known bugs
 * __Book Flip__ mode doesn't work properly with PDF with pages of different sizes
+* __Book Flip__ mode doesn't work properly if PDF loaded directly into this mode
 
 ## License
 This project is released under [MIT License](https://github.com/RaffaeleMorganti/pdf-viewer/blob/master/LICENSE) however some code come from external with following licenses:

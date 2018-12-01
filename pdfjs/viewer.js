@@ -170,7 +170,7 @@ function getViewerConfiguration() {
       scrollVerticalButton: document.getElementById('scrollVertical'),
       scrollHorizontalButton: document.getElementById('scrollHorizontal'),
       scrollWrappedButton: document.getElementById('scrollWrapped'),
-      //%FB: Add bookflip button
+      //%FB: Add flipbook button
       bookFlipButton: document.getElementById('bookFlip'),
     
       spreadNoneButton: document.getElementById('spreadNone'),
@@ -786,8 +786,6 @@ var PDFViewerApplication = {
   },
   set page(val) {
     this.pdfViewer.currentPageNumber = val;
-    //%FB: page changed need page turn
-    bookFlip.flip();
   },
   get page() {
     return this.pdfViewer.currentPageNumber;
@@ -1851,8 +1849,6 @@ var webViewerFileInputChange = void 0;
 }
 function webViewerPresentationMode() {
   PDFViewerApplication.requestPresentationMode();
-  //%FB: scale changed need page resizing
-  bookFlip.resize();
 }
 function webViewerOpenFile() {
   var openFileInputName = PDFViewerApplication.appConfig.openFileInputName;
@@ -8879,6 +8875,8 @@ var BaseViewer = function () {
       if (resetCurrentPageView) {
         this._resetCurrentPageView();
       }
+      //%FB: page changed need page turn
+      bookFlip.flip();
     }
   }, {
     key: 'setDocument',
@@ -9145,6 +9143,8 @@ var BaseViewer = function () {
         }
         this._setScaleUpdatePages(scale, value, noScroll, true);
       }
+      //%FB: scale changed need page resizing
+      bookFlip.resize();
     }
   }, {
     key: '_resetCurrentPageView',
@@ -9546,8 +9546,6 @@ var BaseViewer = function () {
         return;
       }
       this._setScale(val, false);
-      //%FB: scale changed need page resizing
-      bookFlip.resize();
     }
   }, {
     key: 'currentScaleValue',
@@ -9559,8 +9557,6 @@ var BaseViewer = function () {
         return;
       }
       this._setScale(val, false);
-      //%FB: scale changed need page resizing
-      bookFlip.resize();
     }
   }, {
     key: 'pagesRotation',
@@ -9594,6 +9590,8 @@ var BaseViewer = function () {
       if (this.defaultRenderingQueue) {
         this.update();
       }
+      //%FB: rotation need resizing
+      bookFlip.rotate();
     }
   }, {
     key: '_setDocumentViewerElement',
@@ -10898,8 +10896,6 @@ var SecondaryToolbar = function () {
     value: function setPageNumber(pageNumber) {
       this.pageNumber = pageNumber;
       this._updateUIState();
-      //%FB: page changed need page turn
-      bookFlip.flip();
     }
   }, {
     key: 'setPagesCount',
@@ -11310,8 +11306,6 @@ var Toolbar = function () {
       this.pageNumber = pageNumber;
       this.pageLabel = pageLabel;
       this._updateUIState(false);
-      //%FB: page changed need page turn
-      bookFlip.flip();
     }
   }, {
     key: 'setPagesCount',
