@@ -4,16 +4,16 @@ PDF viewer with flip-book interface integration to allow read files flipping pag
 ## Info
 This is a web viewer written in javascript with no external dependencies. It works with almost every browser.
 
-Try it now [HERE](https://raffaelemorganti.github.io/pdf-viewer/)
+***Simply select FlipBook mode into dropdown menu to see how it works.***
 
-Into dropdown menu select FlipBook mode to see how it works.
+Try it now [HERE](https://raffaelemorganti.github.io/pdf-viewer/)
 
 ## Requirements
 Despite no external dependencies in order to build this project some external script are included:
 
-* jQuery 3.3.1 downloaded [here](https://jquery.com/download/).
+* jQuery 3.4.1 downloaded [here](https://jquery.com/download/).
 * Modernizr 3.6.0 downloaded [here](https://modernizr.com/download/?-csstransforms-csstransforms3d-domprefixes-prefixes-setclasses-shiv-testallprops-testprop-teststyles).
-* PDF.js 2.0.943 downloaded [here](https://mozilla.github.io/pdf.js/getting_started/#download).
+* PDF.js 2.1.266 downloaded [here](https://mozilla.github.io/pdf.js/getting_started/#download).
 * turn.js 4.1.0 downloaded [here](http://www.turnjs.com/).
 
 ## Develop
@@ -22,8 +22,8 @@ To help you to understand how it works here a list of modified files in order to
 
 | Type | Files |
 | --- | --- |
-| JS | ***NEW*** pdf-turn.js<br/> pdfjs/viewer.js  |
-| CSS | ***NEW*** turnjs/turn.css<br/> pdfjs/viewer.css |
+| JS | pdf-turn.js ***NEW***<br/> pdfjs/viewer.js  |
+| CSS | turnjs/turn.css ***NEW***<br/> pdfjs/viewer.css |
 | HTML | index.html |
 
 
@@ -33,6 +33,14 @@ Other files come directly from specified source without any edit. External libra
 ## Known bugs
 * __Book Flip__ mode doesn't work properly with PDF with pages of different sizes
 * __Book Flip__ mode doesn't work properly if PDF loaded directly into this mode
+
+## Other problems
+* __Book Flip__ texts are not included in PDF.js locales, so are not translated to the user language. In order to solve this you should go in _'pdfjs/locale/YOUR_LANG'_ and add to the _'viewer.properties'_ file following lines:
+```
+book_flip.title = Flip pages like a book
+book_flip_label = Flip book
+```
+* If you find any other bug open a new Issue
 
 ## License
 This project is released under [MIT License](https://github.com/RaffaeleMorganti/pdf-viewer/blob/master/LICENSE) however some code come from external with following licenses:
