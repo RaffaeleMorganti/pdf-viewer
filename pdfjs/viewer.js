@@ -3807,18 +3807,17 @@ function getVisibleElements(scrollEl, views) {
       if (viewBottom <= top || currentHeight >= bottom || viewRight <= left || currentWidth >= right) {
         continue;
       }
+      var hiddenHeight = Math.max(0, top - currentHeight) + Math.max(0, viewBottom - bottom);
+      var hiddenWidth = Math.max(0, left - currentWidth) + Math.max(0, viewRight - right);
+      var percent = (viewHeight - hiddenHeight) * (viewWidth - hiddenWidth) * 100 / viewHeight / viewWidth | 0;
+      visible.push({
+        id: view.id,
+        x: currentWidth,
+        y: currentHeight,
+        view: view,
+        percent: percent
+      });
     }
-
-    var hiddenHeight = Math.max(0, top - currentHeight) + Math.max(0, viewBottom - bottom);
-    var hiddenWidth = Math.max(0, left - currentWidth) + Math.max(0, viewRight - right);
-    var percent = (viewHeight - hiddenHeight) * (viewWidth - hiddenWidth) * 100 / viewHeight / viewWidth | 0;
-    visible.push({
-      id: view.id,
-      x: currentWidth,
-      y: currentHeight,
-      view: view,
-      percent: percent
-    });
   }
 
   var first = visible[0],

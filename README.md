@@ -32,7 +32,7 @@ Other files come directly from specified source without any edit. External libra
 
 ## Known bugs
 * __Book Flip__ mode doesn't work properly with PDF with pages of different sizes
-* __Book Flip__ mode doesn't work properly if PDF loaded directly into this mode
+* ~__Book Flip__ mode doesn't work properly if PDF loaded directly into this mode~ [solved](https://github.com/RaffaeleMorganti/pdf-viewer/issues/1#issuecomment-532190016)
 
 ## Other problems
 * __Book Flip__ texts are not included in PDF.js locales, so are not translated to the user language. In order to solve this you should go in _'pdfjs/locale/YOUR_LANG'_ and add to the _'viewer.properties'_ file following lines:
