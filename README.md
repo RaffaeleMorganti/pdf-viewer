@@ -30,11 +30,7 @@ To help you to understand how it works here a list of modified files in order to
 Any change in files not listed as NEW is marked with a `$FB:` or `%FB:` comment. Files listed as NEW are build to accomplish final result.
 Other files come directly from specified source without any edit. External libraries files not used were deleted to make the source slimmer and clearer.
 
-## Known bugs
-* __Book Flip__ mode doesn't work properly with PDF with pages of different sizes
-* ~__Book Flip__ mode doesn't work properly if PDF loaded directly into this mode~ [solved](https://github.com/RaffaeleMorganti/pdf-viewer/issues/1#issuecomment-532190016)
-
-## Other problems
+## Known problems
 * __Book Flip__ texts are not included in PDF.js locales, so are not translated to the user language. In order to solve this you should go in _'pdfjs/locale/YOUR_LANG'_ and add to the _'viewer.properties'_ file following lines:
 ```
 book_flip.title = Flip pages like a book
