@@ -1,0 +1,21 @@
+/* turn.js additional*/
+
+.bookViewer{
+	margin: 5px auto 0 auto;
+}
+
+.bookViewer .page{
+	background: #FFF;
+}
+
+/* PDF.js additional */
+
+.secondaryToolbarButton.bookFlip::before {
+	content: url(secondaryToolbarButton-bookFlip.png);
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 1.1), screen and (min-resolution: 1.1dppx) {
+	.secondaryToolbarButton.bookFlip::before {
+		content: url(secondaryToolbarButton-bookFlip@2x.png);
+	}
+}

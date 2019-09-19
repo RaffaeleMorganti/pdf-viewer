@@ -12,7 +12,6 @@ Try it now [HERE](https://raffaelemorganti.github.io/pdf-viewer/)
 Despite no external dependencies in order to build this project some external script are included:
 
 * jQuery 3.4.1 downloaded [here](https://jquery.com/download/).
-* Modernizr 3.6.0 downloaded [here](https://modernizr.com/download/?-csstransforms-csstransforms3d-domprefixes-prefixes-setclasses-shiv-testallprops-testprop-teststyles).
 * PDF.js 2.1.266 downloaded [here](https://mozilla.github.io/pdf.js/getting_started/#download).
 * turn.js 4.1.0 downloaded [here](http://www.turnjs.com/).
 
@@ -23,8 +22,9 @@ To help you to understand how it works here a list of modified files in order to
 | Type | Files |
 | --- | --- |
 | JS | pdf-turn.js ***NEW***<br/> pdfjs/viewer.js  |
-| CSS | turnjs/turn.css ***NEW***<br/> pdfjs/viewer.css |
+| CSS | pdf-turn/pdf-turn.css ***NEW*** |
 | HTML | index.html |
+| PNG | pdf-turn/\*.png ***NEW*** |
 
 
 Any change in files not listed as NEW is marked with a `$FB:` or `%FB:` comment. Files listed as NEW are build to accomplish final result.
@@ -42,6 +42,5 @@ book_flip_label = Flip book
 This project is released under [MIT License](https://github.com/RaffaeleMorganti/pdf-viewer/blob/master/LICENSE) however some code come from external with following licenses:
 
 * jQuery released under [MIT License](https://github.com/jquery/jquery/blob/master/LICENSE.txt)
-* Modernizr released under [MIT License](https://github.com/Modernizr/Modernizr/blob/master/LICENSE)
 * PDF.js released under [Apache License](https://github.com/mozilla/pdf.js/blob/master/LICENSE)
 * turn.js released under [BSD License](https://github.com/blasten/turn.js/blob/master/license.txt)
