@@ -11,16 +11,11 @@ var bookFlip = {
 	active: false,	//flipbook mode on
 	_backup: NaN,	//spread mode backup to restore
 	_spread: NaN,	//spread page mode
-	ready: false,	//libs correctly loaded
 	toStart: false,	//PDF.js require flipbook at start
 
-	// load required script
-	init: function () {
-		bookFlip.ready = true;
-	},
 	// startup flipbook
 	start: function(){
-		if(!this.ready || this.active)return;
+		if(this.active)return;
 		
 		$('.scrollModeButtons').removeClass('toggled');
 		$('#bookFlip').addClass('toggled');
