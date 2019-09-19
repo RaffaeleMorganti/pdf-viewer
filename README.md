@@ -4,8 +4,6 @@ PDF viewer with flip-book interface integration to allow read files flipping pag
 ## Info
 This is a web viewer written in javascript with no external dependencies. It works with almost every browser.
 
-***Simply select FlipBook mode into dropdown menu to see how it works.***
-
 Try it now [HERE](https://raffaelemorganti.github.io/pdf-viewer/)
 
 ## Requirements
@@ -19,12 +17,11 @@ Despite no external dependencies in order to build this project some external sc
 If you want to add features feel free to make a PR.
 To help you to understand how it works here a list of modified files in order to accomplish this result:
 
-| Type | Files |
-| --- | --- |
-| JS | pdf-turn.js ***NEW***<br/> pdfjs/viewer.js  |
-| CSS | pdf-turn/pdf-turn.css ***NEW*** |
-| HTML | index.html |
-| PNG | pdf-turn/\*.png ***NEW*** |
+| Type | Path | Files |
+| --- | --- | --- |
+| JS |  ./pdfjs/ | viewer.js  |
+| HTML | ./ | index.html |
+| ALL | ./pdf-turn/ | ***NEW*** |
 
 
 Any change in files not listed as NEW is marked with a `$FB:` or `%FB:` comment. Files listed as NEW are build to accomplish final result.

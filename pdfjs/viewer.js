@@ -13884,7 +13884,9 @@ function getDefaultPreferences() {
       "enablePrintAutoRotate": false,
       "disablePageLabels": false,
       "historyUpdateUrl": false,
-      "scrollModeOnLoad": -1,
+      //$FB: from -1 (UNKNOWN) to 3 (FLIP) 
+      "scrollModeOnLoad": 3,
+	  
       "spreadModeOnLoad": -1
     });
   }
