@@ -140,5 +140,3 @@ var bookFlip = {
 		return (this._spread === 0) ? 1 : 2;
 	}
 };
-
-bookFlip.init();
