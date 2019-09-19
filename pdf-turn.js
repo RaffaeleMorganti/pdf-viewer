@@ -16,17 +16,7 @@ var bookFlip = {
 
 	// load required script
 	init: function () {
-		if (Modernizr.csstransforms) {
-			$.getScript('turnjs/turn.min.js')
-				.done(function(){
-					bookFlip.ready = true;
-				});
-		} else {
-			$.getScript('turnjs/turn.html4.min.js')
-				.done(function(){
-					bookFlip.ready = true;
-				});
-		}
+		bookFlip.ready = true;
 	},
 	// startup flipbook
 	start: function(){
