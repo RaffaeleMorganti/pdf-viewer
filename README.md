@@ -23,8 +23,9 @@ To help you to understand how it works here a list of modified files in order to
 | Type | Files |
 | --- | --- |
 | JS | pdf-turn.js ***NEW***<br/> pdfjs/viewer.js  |
-| CSS | turnjs/turn.css ***NEW***<br/> pdfjs/viewer.css |
+| CSS | pdf-turn/pdf-turn.css ***NEW*** |
 | HTML | index.html |
+| PNG | pdf-turn/\*.png ***NEW*** |
 
 
 Any change in files not listed as NEW is marked with a `$FB:` or `%FB:` comment. Files listed as NEW are build to accomplish final result.

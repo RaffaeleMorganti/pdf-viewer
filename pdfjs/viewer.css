@@ -1447,11 +1447,6 @@ html[dir="rtl"] .secondaryToolbarButton > span {
   content: url(images/secondaryToolbarButton-scrollWrapped.png);
 }
 
-/* $FB: add bookflip button image */
-.secondaryToolbarButton.bookFlip::before {
-  content: url(images/secondaryToolbarButton-bookFlip.png);
-}
-
 .secondaryToolbarButton.spreadNone::before {
   content: url(images/secondaryToolbarButton-spreadNone.png);
 }
@@ -2216,11 +2211,6 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
 
   .secondaryToolbarButton.scrollWrapped::before {
     content: url(images/secondaryToolbarButton-scrollWrapped@2x.png);
-  }
-
-  /* $FB: add bookflip button image */
-  .secondaryToolbarButton.bookFlip::before {
-    content: url(images/secondaryToolbarButton-bookFlip@2x.png);
   }
 
   .secondaryToolbarButton.spreadNone::before {
