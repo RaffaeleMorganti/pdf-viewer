@@ -1,18 +1,50 @@
   /********************************************************/
  /**     HERE MAIN MODIFIED PART FOR turnjs SUPPORT     **/
 /********************************************************/
-/// requires jquery, modernizr and turnjs
-/// all code added in viewer.js file (pdfjs directory) in order to support 
-/// flipbook is commented with '%FB:' string to allow to find it easilly 
+/// requires jquery and turnjs
+/// all code added in viewer.js (from pdfjs build) in order to support 
+/// flipbook is commented with '$FB:' string to allow to find it easilly 
 
 var bookFlip = {
 	_width: [],		//flipbook pages width
 	_height: [],	//flipbook pages height
 	active: false,	//flipbook mode on
-	_backup: NaN,	//spread mode backup to restore
+	__spread: NaN,	//spread mode backup to restore
+	_evSpread: null,//spread mode changed default event handler 
 	_spread: NaN,	//spread page mode
 	toStart: false,	//PDF.js require flipbook at start
 
+	// set event listeners
+	init: function(){
+		$(document).on('rotationchanging', () => {bookFlip.rotate()});
+		$(document).on('scalechanging', () => {bookFlip.resize()});
+		$(document).on('pagechanging', () => {bookFlip.flip()});
+		$(document).on('documentloaded', () => {bookFlip.stop()});
+			
+		$(document).on('scrollmodechanged', () => {
+			var scroll = PDFViewerApplication.pdfViewer.scrollMode;
+			if (scroll === 3)bookFlip.start();
+			else bookFlip.stop();
+			var button = PDFViewerApplication.appConfig.secondaryToolbar.bookFlipButton;
+			button.classList.toggle('toggled', scroll === 3);
+		});
+		
+		$(document).on('switchspreadmode', (evt) => {
+			bookFlip.spread(evt.originalEvent.detail.mode);
+			PDFViewerApplication.eventBus.dispatch('spreadmodechanged', {
+				source: PDFViewerApplication,
+				mode: evt.originalEvent.detail.mode
+			});
+		});
+		
+		$(document).on('pagesloaded', () => {
+			if(bookFlip.toStart){
+				bookFlip.toStart = false;
+				PDFViewerApplication.pdfViewer.scrollMode = 3;
+			}
+		});
+
+	},
 	// startup flipbook
 	start: function(){
 		if(this.active)return;
@@ -20,11 +52,17 @@ var bookFlip = {
 		$('.scrollModeButtons').removeClass('toggled');
 		$('#bookFlip').addClass('toggled');
 		
-		this._backup = PDFViewerApplication.pdfViewer._spreadMode;
-		this._spread = (this._backup !== 2) ? 0 : 2;
-		PDFViewerApplication.pdfViewer._spreadMode = 0;
-		PDFViewerApplication.pdfViewer._updateSpreadMode();
+		this.__spread = PDFViewerApplication.pdfViewer.spreadMode;
+		var selected = $('.spreadModeButtons.toggled').attr('id');
+		this._spread = (this.__spread !== 2) ? 0 : 2;
+		PDFViewerApplication.pdfViewer.spreadMode = 0;
 		PDFViewerApplication.pdfViewer._spreadMode = -1;
+		
+		$('.spreadModeButtons').removeClass('toggled');
+		$('#' + selected).addClass('toggled');
+		
+		this._evSpread = PDFViewerApplication.eventBus._listeners.switchspreadmode;
+		PDFViewerApplication.eventBus._listeners.switchspreadmode = null;
 		
 		var scale = PDFViewerApplication.pdfViewer.currentScale;
 		
@@ -72,8 +110,8 @@ var bookFlip = {
 		$('#viewer').turn('destroy');
 		$('#viewer').removeAttr('style');
 		
-		PDFViewerApplication.pdfViewer._spreadMode = this._spread;
-		PDFViewerApplication.pdfViewer._updateSpreadMode();
+		PDFViewerApplication.eventBus._listeners.switchspreadmode = this._evSpread;
+		PDFViewerApplication.pdfViewer.spreadMode = this.__spread;
 		
 		$('#viewer .page').removeAttr('style');
 		$('#viewer').removeClass('shadow');
@@ -86,8 +124,6 @@ var bookFlip = {
 			$(this).css( 'width', parent._width[page] * scale).css( 'height', parent._height[page] * scale);
 		});
 		
-		PDFViewerApplication.pdfViewer._spreadMode = this._backup;
-		PDFViewerApplication.pdfViewer._updateSpreadMode();
 	},
 	// resize flipbook pages
 	resize: function(){
@@ -120,9 +156,11 @@ var bookFlip = {
 	// load pages near shown page
 	load: function(views){
 		var arr = [];
-		var page = PDFViewerApplication.page;
-		var limit = (this._spread === 0) ? 1 : 2;
-		for (var i = Math.max(page - limit - 1,0), ii = Math.min(page + limit, views.length); i < ii; i++) {
+		var page = PDFViewerApplication.page - 1;
+		var min = (this._spread === 0) ? 1 : (page%2) ? 2 : 3;
+		var max = (this._spread === 0) ? 1 : (page%2) ? 3 : 2;
+		console.log(views.length);
+		for (var i = Math.max(page - min,1), ii = Math.min(page + max, views.length); i <= ii; i++) {
 			arr.push({
 				id: views[i].id,
 				x: views[i].div.offsetLeft + views[i].div.clientLeft,
