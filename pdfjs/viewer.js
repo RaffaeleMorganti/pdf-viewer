@@ -170,7 +170,7 @@ function getViewerConfiguration() {
       scrollVerticalButton: document.getElementById('scrollVertical'),
       scrollHorizontalButton: document.getElementById('scrollHorizontal'),
       scrollWrappedButton: document.getElementById('scrollWrapped'),
-      //%FB: add flipbook button
+      //$FB: add flipbook button
       bookFlipButton: document.getElementById('bookFlip'),
 	  
       spreadNoneButton: document.getElementById('spreadNone'),
@@ -1276,7 +1276,7 @@ var PDFViewerApplication = {
                   if (pageMode && sidebarView === _pdf_sidebar.SidebarView.UNKNOWN) {
                     sidebarView = apiPageModeToSidebarView(pageMode);
                   }
-                  //%FB: prevent start in bookflip mode
+                  //$FB: prevent start in bookflip mode
                   if(scrollMode === _ui_utils.ScrollMode.FLIP) {
                     scrollMode = _ui_utils.ScrollMode.VERTICAL;
                     bookFlip.toStart = true;
@@ -3411,7 +3411,7 @@ var ScrollMode = {
   VERTICAL: 0,
   HORIZONTAL: 1,
   WRAPPED: 2,
-  //%FB: add flipbook scroll mode
+  //$FB: add flipbook scroll mode
   FLIP: 3
 };
 exports.ScrollMode = ScrollMode;
@@ -7481,13 +7481,6 @@ function () {
       _this._isViewerInPresentationMode = evt.active || evt.switchInProgress;
     });
     this.eventBus.on('pagesloaded', function (evt) {
-      //%FB: now can start flipbook
-      if(bookFlip.toStart){
-		  bookFlip.toStart = false;
-          PDFViewerApplication.pdfViewer._scrollMode = _ui_utils.ScrollMode.FLIP;
-          PDFViewerApplication.pdfViewer._updateScrollMode();
-      }
-	  
       _this._isPagesLoaded = !!evt.pagesCount;
     });
   }
@@ -10383,8 +10376,6 @@ function () {
       if (resetCurrentPageView) {
         this._resetCurrentPageView();
       }
-      //%FB: page changed need page turn
-      bookFlip.flip();
 
       return true;
     }
@@ -10697,8 +10688,6 @@ function () {
 
         this._setScaleUpdatePages(scale, value, noScroll, true);
       }
-      //%FB: scale changed need page resizing
-      bookFlip.resize();
     }
   }, {
     key: "_resetCurrentPageView",
@@ -10733,7 +10722,8 @@ function () {
         return;
       }
 
-      if (this.isInPresentationMode || !destArray) {
+      //$FB: bookflip need same handling as presentation mode for internal links
+      if (bookFlip.active || this.isInPresentationMode || !destArray) {
         this._setCurrentPageNumber(pageNumber, true);
 
         return;
@@ -10813,11 +10803,6 @@ function () {
           pageNumber: pageNumber
         });
 
-        return;
-      }
-      //%FB: bookflip need different handling for internal links
-      if(bookFlip.active){
-        this._setCurrentPageNumber(pageNumber);
         return;
       }
 
@@ -11086,12 +11071,6 @@ function () {
           viewer = this.viewer;
       viewer.classList.toggle('scrollHorizontal', scrollMode === _ui_utils.ScrollMode.HORIZONTAL);
       viewer.classList.toggle('scrollWrapped', scrollMode === _ui_utils.ScrollMode.WRAPPED);
-      //%FB: here action to activate/deactivate flipbook
-      if (scrollMode === _ui_utils.ScrollMode.FLIP) {
-        bookFlip.start();
-      } else {
-        bookFlip.stop();
-      }
 
       if (!this.pdfDocument || !pageNumber) {
         return;
@@ -11112,10 +11091,6 @@ function () {
 
       if (!this.pdfDocument) {
         return;
-      }
-      //%FB: require specific spread mode handling
-      if (bookFlip.active) {
-        return bookFlip.spread(this._spreadMode);
       }
 
       var viewer = this.viewer,
@@ -11271,9 +11246,6 @@ function () {
       if (this.defaultRenderingQueue) {
         this.update();
       }
-      //%FB: rotation need resizing
-      bookFlip.rotate();
-
     }
   }, {
     key: "_setDocumentViewerElement",
@@ -12736,7 +12708,7 @@ function () {
       },
       close: true
     },
-    //%FB: add flipbook button
+    //$FB: add flipbook button
     {
       element: options.bookFlipButton,
       eventName: 'switchscrollmode',
@@ -12891,8 +12863,6 @@ function () {
         buttons.scrollVerticalButton.classList.toggle('toggled', mode === _ui_utils.ScrollMode.VERTICAL);
         buttons.scrollHorizontalButton.classList.toggle('toggled', mode === _ui_utils.ScrollMode.HORIZONTAL);
         buttons.scrollWrappedButton.classList.toggle('toggled', mode === _ui_utils.ScrollMode.WRAPPED);
-        //%FB: add flipbook button
-        buttons.bookFlipButton.classList.toggle('toggled', mode === _ui_utils.ScrollMode.FLIP);
 
         var isScrollModeHorizontal = mode === _ui_utils.ScrollMode.HORIZONTAL;
         buttons.spreadNoneButton.disabled = isScrollModeHorizontal;
@@ -13870,7 +13840,8 @@ function getDefaultPreferences() {
       "sidebarViewOnLoad": -1,
       "cursorToolOnLoad": 0,
       "enableWebGL": false,
-      "eventBusDispatchToDOM": false,
+      //$FB: dispatch to DOM to allow event handling
+      "eventBusDispatchToDOM": true,
       "pdfBugEnabled": false,
       "disableRange": false,
       "disableStream": false,
@@ -13886,7 +13857,7 @@ function getDefaultPreferences() {
       "historyUpdateUrl": false,
       //$FB: from -1 (UNKNOWN) to 3 (FLIP) 
       "scrollModeOnLoad": 3,
-	  
+
       "spreadModeOnLoad": -1
     });
   }

@@ -24,7 +24,7 @@ To help you to understand how it works here a list of modified files in order to
 | ALL | ./pdf-turn/ | ***NEW*** |
 
 
-Any change in files not listed as NEW is marked with a `$FB:` or `%FB:` comment. Files listed as NEW are build to accomplish final result.
+Any change in files not listed as NEW is marked with a `$FB:` comment. Files listed as NEW are build to accomplish final result.
 Other files come directly from specified source without any edit. External libraries files not used were deleted to make the source slimmer and clearer.
 
 ## Known problems
