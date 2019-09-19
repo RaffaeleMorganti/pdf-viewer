@@ -13857,6 +13857,7 @@ function getDefaultPreferences() {
       "historyUpdateUrl": false,
       //$FB: from -1 (UNKNOWN) to 3 (FLIP) 
       "scrollModeOnLoad": 3,
+
       "spreadModeOnLoad": -1
     });
   }
