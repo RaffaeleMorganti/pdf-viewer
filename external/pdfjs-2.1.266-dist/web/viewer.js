@@ -250,8 +250,7 @@ function getViewerConfiguration() {
     },
     printContainer: document.getElementById('printContainer'),
     openFileInputName: 'fileInput',
-    //$FB: original value: './debugger.js'
-    debuggerScriptPath: './pdfjs/debugger.js'
+    debuggerScriptPath: './debugger.js'
   };
 }
 
@@ -4212,8 +4211,7 @@ var pdfjsLib;
 if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
   pdfjsLib = window['pdfjs-dist/build/pdf'];
 } else {
-  //$FB: original value: '../build/pdf.js'
-  pdfjsLib = require('./pdfjs/build/pdf.js');
+  pdfjsLib = require('../build/pdf.js');
 }
 
 module.exports = pdfjsLib;
@@ -5138,8 +5136,7 @@ var defaultOptions = {
     kind: OptionKind.VIEWER
   },
   defaultUrl: {
-    //$FB: original value: 'compressed.tracemonkey-pldi-09.pdf'
-    value: 'pdf.pdf',
+    value: 'compressed.tracemonkey-pldi-09.pdf',
     kind: OptionKind.VIEWER
   },
   defaultZoomValue: {
@@ -5228,8 +5225,7 @@ var defaultOptions = {
     kind: OptionKind.API
   },
   cMapUrl: {
-    //$FB: original value: '../web/cmaps/'
-    value: './cmaps/',
+    value: '../web/cmaps/',
     kind: OptionKind.API
   },
   disableAutoFetch: {
@@ -5278,8 +5274,7 @@ var defaultOptions = {
     kind: OptionKind.WORKER
   },
   workerSrc: {
-    //$FB: original value: '../build/pdf.worker.js'
-    value: './pdfjs/build/pdf.worker.js',
+    value: '../build/pdf.worker.js',
     kind: OptionKind.WORKER
   }
 };
