@@ -21,8 +21,7 @@ var bookFlip = {
 		$(document).on('rotationchanging', () => {bookFlip.rotate()});
 		$(document).on('scalechanging', () => {bookFlip.resize()});
 		$(document).on('pagechanging', () => {bookFlip.flip()});
-		$(document).on('documentloaded', () => {bookFlip.stop()});
-			
+
 		$(document).on('scrollmodechanged', () => {
 			var scroll = PDFViewerApplication.pdfViewer.scrollMode;
 			if (scroll === 3)bookFlip.start();
@@ -48,6 +47,7 @@ var bookFlip = {
 		});
 
 		$(document).on('documentloaded', () => {
+			bookFlip.stop();
 			var scrollMode = PDFViewerApplicationOptions.get('scrollModeOnLoad');
 			if (scrollMode === -1) {
 				scrollMode = PDFViewerApplication.store.file.scrollMode;
@@ -214,19 +214,33 @@ var bookFlip = {
 	},
 	// load pages near shown page
 	load: function(views){
+		if(!this.active)return;
 		var arr = [];
 		var page = PDFViewerApplication.page;
-		var min = (this._spread === 0) ? 2 : (page%2) ? 4 : 3;
-		var max = (this._spread === 0) ? 1 : (page%2) ? 2 : 3;
-		for (var i = Math.max(page - min,0), ii = Math.min(page + max, views.length); i < ii; i++) {
+		var min = Math.max(page - ((this._spread === 0) ? 2 : (page%2) ? 4 : 3), 0);
+		var pos = Math.max(((this._spread === 0) ? page : page - (page%2)) -1, 0);
+		var max = Math.min(page + ((this._spread === 0) ? 1 : (page%2) ? 2 : 3), views.length);
+		
+		for (var i = pos, ii = max; i < ii; i++) {
 			arr.push({
 				id: views[i].id,
-				x: views[i].div.offsetLeft + views[i].div.clientLeft,
-				y: views[i].div.offsetTop + views[i].div.clientTop,
+				x: 0,
+				y: 0,
 				view: views[i],
 				percent: 100
 			});
 		}
+		for (var i = min, ii = pos; i < ii; i++) {
+			arr.push({
+				id: views[i].id,
+				x: 0,
+				y: 0,
+				view: views[i],
+				percent: 100
+			});
+		}
+		if(this._spread !== 0 && (page%2) && page !== 1) [arr[0],arr[1]] = [arr[1],arr[0]]
+		
 		return arr;
 	},
 	_spreadType: function(){
