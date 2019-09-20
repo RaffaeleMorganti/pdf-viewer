@@ -1269,6 +1269,13 @@ var PDFViewerApplication = {
                     }
                   }
 
+                  //$FB: prevent start in bookflip mode
+                  if(scrollMode === _ui_utils.ScrollMode.FLIP) {
+                    scrollMode = _ui_utils.ScrollMode.VERTICAL;
+                    bookFlip.toStart = true;
+                    $('#viewer').css({ opacity: 0 });
+                  }
+
                   if (pageMode && sidebarView === _pdf_sidebar.SidebarView.UNKNOWN) {
                     sidebarView = apiPageModeToSidebarView(pageMode);
                   }
@@ -3775,10 +3782,7 @@ function getVisibleElements(scrollEl, views) {
       numViews = views.length;
   var firstVisibleElementInd = numViews === 0 ? 0 : binarySearchFirstItem(views, horizontal ? isElementRightAfterViewLeft : isElementBottomAfterViewTop);
 
-  //%FB: get current page, 2 pages before and 2 pages after (need different handling)
-  if(bookFlip.active && scrollEl.id=='viewerContainer'){
-    visible = bookFlip.load(views);
-  }else{
+ 
     if (firstVisibleElementInd > 0 && firstVisibleElementInd < numViews && !horizontal) {
       firstVisibleElementInd = backtrackBeforeAllVisibleElements(firstVisibleElementInd, views, top);
     }
@@ -3813,7 +3817,6 @@ function getVisibleElements(scrollEl, views) {
         percent: percent
       });
     }
-  }
 
   var first = visible[0],
       last = visible[visible.length - 1];
@@ -10815,8 +10818,7 @@ function () {
       var currentScale = this._currentScale;
       var currentScaleValue = this._currentScaleValue;
       var normalizedScaleValue = parseFloat(currentScaleValue) === currentScale ? Math.round(currentScale * 10000) / 100 : currentScaleValue;
-      //%FB: fix page number in bookflip mode
-      var pageNumber = (bookFlip.active) ? this._currentPageNumber : firstPage.id;
+      var pageNumber = firstPage.id;
 
       var pdfOpenParams = '#page=' + pageNumber;
       pdfOpenParams += '&zoom=' + normalizedScaleValue;

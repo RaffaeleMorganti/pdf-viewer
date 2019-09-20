@@ -15,12 +15,14 @@ var bookFlip = {
 	toStart: false,	//PDFjs require flipbook at start
 	onLoad: true,	//start PDFjs into flipbook mode 
 	_intoView: null,//link handler default function backup
+	_visPages: null,//visible pages function backup
 
 	// event listeners when bookFlip need different handling 
 	init: function(){
 		$(document).on('rotationchanging', () => {bookFlip.rotate()});
 		$(document).on('scalechanging', () => {bookFlip.resize()});
 		$(document).on('pagechanging', () => {bookFlip.flip()});
+		$(document).on('documentinit', () => {bookFlip.stop()});
 
 		$(document).on('scrollmodechanged', () => {
 			var scroll = PDFViewerApplication.pdfViewer.scrollMode;
@@ -43,20 +45,6 @@ var bookFlip = {
 				bookFlip.toStart = false;
 				PDFViewerApplication.pdfViewer.scrollMode = 3;
 				if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',3);
-			}
-		});
-
-		$(document).on('documentloaded', () => {
-			bookFlip.stop();
-			var scrollMode = PDFViewerApplicationOptions.get('scrollModeOnLoad');
-			if (scrollMode === -1) {
-				scrollMode = PDFViewerApplication.store.file.scrollMode;
-			}
-			if(scrollMode === 3) {
-				bookFlip.toStart = true;
-				$('#viewer').css({ opacity: 0 });
-				PDFViewerApplication.store.file.scrollMode = 0;
-				if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',-1);
 			}
 		});
 
@@ -107,6 +95,9 @@ var bookFlip = {
 		
 		this._intoView = PDFViewerApplication.pdfViewer.scrollPageIntoView;
 		PDFViewerApplication.pdfViewer.scrollPageIntoView = (data) => {return bookFlip.link(data)};
+		
+		this._visPages = PDFViewerApplication.pdfViewer._getVisiblePages;
+		PDFViewerApplication.pdfViewer._getVisiblePages = () => {return bookFlip.load()};
 		
 		$('.spreadModeButtons').removeClass('toggled');
 		$('#' + selected).addClass('toggled');
@@ -162,10 +153,11 @@ var bookFlip = {
 		$('#viewer').turn('destroy');
 		$('#viewer').removeAttr('style');
 		
+		PDFViewerApplication.pdfViewer.scrollPageIntoView = this._intoView;
+		PDFViewerApplication.pdfViewer._getVisiblePages = this._visPages;
+		
 		PDFViewerApplication.eventBus._listeners.switchspreadmode = this._evSpread;
 		PDFViewerApplication.pdfViewer.spreadMode = this.__spread;
-		
-		PDFViewerApplication.pdfViewer.scrollPageIntoView = this._intoView;
 		
 		$('#viewer .page').removeAttr('style');
 		$('#viewer').removeClass('shadow');
@@ -213,15 +205,15 @@ var bookFlip = {
 		PDFViewerApplication.page = data.pageNumber;
 	},
 	// load pages near shown page
-	load: function(views){
+	load: function(){
 		if(!this.active)return;
+		var views = PDFViewerApplication.pdfViewer._pages;
 		var arr = [];
 		var page = PDFViewerApplication.page;
 		var min = Math.max(page - ((this._spread === 0) ? 2 : (page%2) ? 4 : 3), 0);
-		var pos = Math.max(((this._spread === 0) ? page : page - (page%2)) -1, 0);
 		var max = Math.min(page + ((this._spread === 0) ? 1 : (page%2) ? 2 : 3), views.length);
 		
-		for (var i = pos, ii = max; i < ii; i++) {
+		for (var i = min, ii = max; i < ii; i++) {
 			arr.push({
 				id: views[i].id,
 				x: 0,
@@ -230,18 +222,8 @@ var bookFlip = {
 				percent: 100
 			});
 		}
-		for (var i = min, ii = pos; i < ii; i++) {
-			arr.push({
-				id: views[i].id,
-				x: 0,
-				y: 0,
-				view: views[i],
-				percent: 100
-			});
-		}
-		if(this._spread !== 0 && (page%2) && page !== 1) [arr[0],arr[1]] = [arr[1],arr[0]]
-		
-		return arr;
+
+		return {first:arr[page - min - 1],last:arr[arr.length-1],views:arr};
 	},
 	_spreadType: function(){
 		return (this._spread === 0) ? 'single' : 'double';
