@@ -10,14 +10,22 @@ var bookFlip = {
 	_height: [],	//flipbook pages height
 	active: false,	//flipbook mode on
 	__spread: NaN,	//spread mode backup to restore
-	_evSpread: null,//spread mode changed default event handler 
+	_evSpread: null,//spread mode changed default event handler
 	_spread: NaN,	//spread page mode
 	toStart: false,	//PDFjs require flipbook at start
 	onLoad: true,	//start PDFjs into flipbook mode 
-	_intoView: null,//link handler default function backup
+	_intoView: null,//link handler default function
 
 	// event listeners when bookFlip need different handling 
 	init: function(){
+		$(() => {
+			var bookFlip = $('.secondaryToolbarButton.scrollModeButtons').last().clone();
+			bookFlip.attr('id','bookFlip').attr('title','Use Book Flip').attr('data-l10n-id','book_flip');
+			bookFlip.removeClass().addClass('secondaryToolbarButton scrollModeButtons bookFlip');
+			bookFlip.children().attr('data-l10n-id','book_flip_label').text('Book Flip');
+			bookFlip.insertAfter($('.secondaryToolbarButton.scrollModeButtons').last());
+		});
+		
 		$(document).on('rotationchanging', () => {bookFlip.rotate()});
 		$(document).on('scalechanging', () => {bookFlip.resize()});
 		$(document).on('pagechanging', () => {bookFlip.flip()});
@@ -31,6 +39,15 @@ var bookFlip = {
 			button.classList.toggle('toggled', scroll === 3);
 		});
 		
+		$(document).on('switchscrollmode',(evt)=>{
+			var scroll = evt.originalEvent.detail.mode;
+			PDFViewerApplication.pdfViewer._scrollMode = scroll;
+			PDFViewerApplication.pdfViewer._updateScrollMode();
+				PDFViewerApplication.eventBus.dispatch('scrollmodechanged', {
+				mode: scroll
+			});
+		});
+		
 		$(document).on('switchspreadmode', (evt) => {
 			bookFlip.spread(evt.originalEvent.detail.mode);
 			PDFViewerApplication.eventBus.dispatch('spreadmodechanged', {
@@ -42,12 +59,17 @@ var bookFlip = {
 		$(document).on('pagesloaded', () => {
 			if(bookFlip.toStart){
 				bookFlip.toStart = false;
-				PDFViewerApplication.pdfViewer.scrollMode = 3;
+				PDFViewerApplication.eventBus.dispatch('switchscrollmode', {
+					mode: 3
+				});
 				if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',3);
 			}
 		});
 
 		$(document).on('documentloaded', () => {
+			//this._evScroll = PDFViewerApplication.eventBus._listeners.switchscrollmode;
+			PDFViewerApplication.eventBus._listeners.switchscrollmode = null;
+			
 			var scrollMode = PDFViewerApplicationOptions.get('scrollModeOnLoad');
 			if (scrollMode === -1) {
 				scrollMode = PDFViewerApplication.store.file.scrollMode;

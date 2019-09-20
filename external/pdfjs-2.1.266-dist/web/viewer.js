@@ -3401,8 +3401,6 @@ var ScrollMode = {
   VERTICAL: 0,
   HORIZONTAL: 1,
   WRAPPED: 2,
-  //$FB: add flipbook scroll mode
-  FLIP: 3
 };
 exports.ScrollMode = ScrollMode;
 var SpreadMode = {
