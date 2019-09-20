@@ -49,6 +49,7 @@ var bookFlip = {
 	start: function(){
 		if(this.active)return;
 		
+		$('#viewer').css({ opacity: 1 });
 		$('.scrollModeButtons').removeClass('toggled');
 		$('#bookFlip').addClass('toggled');
 		
@@ -156,11 +157,10 @@ var bookFlip = {
 	// load pages near shown page
 	load: function(views){
 		var arr = [];
-		var page = PDFViewerApplication.page - 1;
-		var min = (this._spread === 0) ? 1 : (page%2) ? 2 : 3;
-		var max = (this._spread === 0) ? 1 : (page%2) ? 3 : 2;
-		console.log(views.length);
-		for (var i = Math.max(page - min,1), ii = Math.min(page + max, views.length); i <= ii; i++) {
+		var page = PDFViewerApplication.page;
+		var min = (this._spread === 0) ? 2 : (page%2) ? 4 : 3;
+		var max = (this._spread === 0) ? 1 : (page%2) ? 2 : 3;
+		for (var i = Math.max(page - min,0), ii = Math.min(page + max, views.length); i < ii; i++) {
 			arr.push({
 				id: views[i].id,
 				x: views[i].div.offsetLeft + views[i].div.clientLeft,
@@ -178,3 +178,5 @@ var bookFlip = {
 		return (this._spread === 0) ? 1 : 2;
 	}
 };
+
+bookFlip.init();

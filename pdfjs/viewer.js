@@ -1280,6 +1280,7 @@ var PDFViewerApplication = {
                   if(scrollMode === _ui_utils.ScrollMode.FLIP) {
                     scrollMode = _ui_utils.ScrollMode.VERTICAL;
                     bookFlip.toStart = true;
+                    $('#viewer').css({ opacity: 0 });
                   }
 				  
                   _this5.setInitialView(hash, {
@@ -13857,7 +13858,6 @@ function getDefaultPreferences() {
       "historyUpdateUrl": false,
       //$FB: from -1 (UNKNOWN) to 3 (FLIP) 
       "scrollModeOnLoad": 3,
-
       "spreadModeOnLoad": -1
     });
   }
