@@ -170,9 +170,6 @@ function getViewerConfiguration() {
       scrollVerticalButton: document.getElementById('scrollVertical'),
       scrollHorizontalButton: document.getElementById('scrollHorizontal'),
       scrollWrappedButton: document.getElementById('scrollWrapped'),
-      //$FB: add flipbook button
-      bookFlipButton: document.getElementById('bookFlip'),
-	  
       spreadNoneButton: document.getElementById('spreadNone'),
       spreadOddButton: document.getElementById('spreadOdd'),
       spreadEvenButton: document.getElementById('spreadEven'),
@@ -250,8 +247,7 @@ function getViewerConfiguration() {
     },
     printContainer: document.getElementById('printContainer'),
     openFileInputName: 'fileInput',
-    //$FB: original value: './debugger.js'
-    debuggerScriptPath: './pdfjs/debugger.js'
+    debuggerScriptPath: './debugger.js'
   };
 }
 
@@ -1276,13 +1272,6 @@ var PDFViewerApplication = {
                   if (pageMode && sidebarView === _pdf_sidebar.SidebarView.UNKNOWN) {
                     sidebarView = apiPageModeToSidebarView(pageMode);
                   }
-                  //$FB: prevent start in bookflip mode
-                  if(scrollMode === _ui_utils.ScrollMode.FLIP) {
-                    scrollMode = _ui_utils.ScrollMode.VERTICAL;
-                    bookFlip.toStart = true;
-                    $('#viewer').css({ opacity: 0 });
-                  }
-				  
                   _this5.setInitialView(hash, {
                     rotation: rotation,
                     sidebarView: sidebarView,
@@ -4212,8 +4201,7 @@ var pdfjsLib;
 if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
   pdfjsLib = window['pdfjs-dist/build/pdf'];
 } else {
-  //$FB: original value: '../build/pdf.js'
-  pdfjsLib = require('./pdfjs/build/pdf.js');
+  pdfjsLib = require('../build/pdf.js');
 }
 
 module.exports = pdfjsLib;
@@ -5138,8 +5126,7 @@ var defaultOptions = {
     kind: OptionKind.VIEWER
   },
   defaultUrl: {
-    //$FB: original value: 'compressed.tracemonkey-pldi-09.pdf'
-    value: 'pdf.pdf',
+    value: 'compressed.tracemonkey-pldi-09.pdf',
     kind: OptionKind.VIEWER
   },
   defaultZoomValue: {
@@ -5228,8 +5215,7 @@ var defaultOptions = {
     kind: OptionKind.API
   },
   cMapUrl: {
-    //$FB: original value: '../web/cmaps/'
-    value: './cmaps/',
+    value: '../web/cmaps/',
     kind: OptionKind.API
   },
   disableAutoFetch: {
@@ -5278,8 +5264,7 @@ var defaultOptions = {
     kind: OptionKind.WORKER
   },
   workerSrc: {
-    //$FB: original value: '../build/pdf.worker.js'
-    value: './pdfjs/build/pdf.worker.js',
+    value: '../build/pdf.worker.js',
     kind: OptionKind.WORKER
   }
 };
@@ -10723,8 +10708,7 @@ function () {
         return;
       }
 
-      //$FB: bookflip need same handling as presentation mode for internal links
-      if (bookFlip.active || this.isInPresentationMode || !destArray) {
+      if (this.isInPresentationMode || !destArray) {
         this._setCurrentPageNumber(pageNumber, true);
 
         return;
@@ -12709,15 +12693,6 @@ function () {
       },
       close: true
     },
-    //$FB: add flipbook button
-    {
-      element: options.bookFlipButton,
-      eventName: 'switchscrollmode',
-      eventDetails: {
-        mode: _ui_utils.ScrollMode.FLIP
-      },
-      close: true
-    },
     {
       element: options.spreadNoneButton,
       eventName: 'switchspreadmode',
@@ -13856,8 +13831,7 @@ function getDefaultPreferences() {
       "enablePrintAutoRotate": false,
       "disablePageLabels": false,
       "historyUpdateUrl": false,
-      //$FB: from -1 (UNKNOWN) to 3 (FLIP) 
-      "scrollModeOnLoad": 3,
+      "scrollModeOnLoad": -1,
       "spreadModeOnLoad": -1
     });
   }

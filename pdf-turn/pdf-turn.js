@@ -12,9 +12,11 @@ var bookFlip = {
 	__spread: NaN,	//spread mode backup to restore
 	_evSpread: null,//spread mode changed default event handler 
 	_spread: NaN,	//spread page mode
-	toStart: false,	//PDF.js require flipbook at start
+	toStart: false,	//PDFjs require flipbook at start
+	onLoad: true,	//start PDFjs into flipbook mode 
+	_intoView: null,//link handler default function backup
 
-	// set event listeners
+	// event listeners when bookFlip need different handling 
 	init: function(){
 		$(document).on('rotationchanging', () => {bookFlip.rotate()});
 		$(document).on('scalechanging', () => {bookFlip.resize()});
@@ -41,9 +43,53 @@ var bookFlip = {
 			if(bookFlip.toStart){
 				bookFlip.toStart = false;
 				PDFViewerApplication.pdfViewer.scrollMode = 3;
+				if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',3);
 			}
 		});
 
+		$(document).on('documentloaded', () => {
+			var scrollMode = PDFViewerApplicationOptions.get('scrollModeOnLoad');
+			if (scrollMode === -1) {
+				scrollMode = PDFViewerApplication.store.file.scrollMode;
+			}
+			if(scrollMode === 3) {
+				bookFlip.toStart = true;
+				$('#viewer').css({ opacity: 0 });
+				PDFViewerApplication.store.file.scrollMode = 0;
+				if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',-1);
+			}
+		});
+
+		$(document).on('baseviewerinit', () => {
+			if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',3);
+			
+			var button = document.getElementById('bookFlip');
+			PDFViewerApplication.appConfig.secondaryToolbar['bookFlipButton'] = button;
+			var btns = PDFViewerApplication.secondaryToolbar.buttons;
+			btns.push({
+				element: button,
+				eventName: 'switchscrollmode',
+				eventDetails: {
+					mode: 3
+				},
+				close: true
+			});
+			var btn = btns[btns.length-1];
+			btn.element.addEventListener('click', () => {	
+				if (btn.eventName !== null) {
+					var details = {
+						source: PDFViewerApplication.secondaryToolbar
+					};
+					for (var property in btn.eventDetails) {
+						details[property] = btn.eventDetails[property];
+					}
+					PDFViewerApplication.secondaryToolbar.eventBus.dispatch(btn.eventName, details);
+				}
+				if (close) {
+					PDFViewerApplication.secondaryToolbar.close();
+				}
+			});
+		});
 	},
 	// startup flipbook
 	start: function(){
@@ -58,6 +104,9 @@ var bookFlip = {
 		this._spread = (this.__spread !== 2) ? 0 : 2;
 		PDFViewerApplication.pdfViewer.spreadMode = 0;
 		PDFViewerApplication.pdfViewer._spreadMode = -1;
+		
+		this._intoView = PDFViewerApplication.pdfViewer.scrollPageIntoView;
+		PDFViewerApplication.pdfViewer.scrollPageIntoView = (data) => {return bookFlip.link(data)};
 		
 		$('.spreadModeButtons').removeClass('toggled');
 		$('#' + selected).addClass('toggled');
@@ -106,6 +155,8 @@ var bookFlip = {
 		if(!this.active)return;
 		this.active = false;
 		
+		$('#bookFlip').removeClass('toggled');
+		
 		var scale = PDFViewerApplication.pdfViewer.currentScale;
 		
 		$('#viewer').turn('destroy');
@@ -113,6 +164,8 @@ var bookFlip = {
 		
 		PDFViewerApplication.eventBus._listeners.switchspreadmode = this._evSpread;
 		PDFViewerApplication.pdfViewer.spreadMode = this.__spread;
+		
+		PDFViewerApplication.pdfViewer.scrollPageIntoView = this._intoView;
 		
 		$('#viewer .page').removeAttr('style');
 		$('#viewer').removeClass('shadow');
@@ -153,6 +206,11 @@ var bookFlip = {
 		if(!PDFViewerApplication.pdfViewer.hasEqualPageSizes){
 			this.resize();
 		}
+	},
+	// follow internal links
+	link: function(data){
+		if(!this.active)return;
+		PDFViewerApplication.page = data.pageNumber;
 	},
 	// load pages near shown page
 	load: function(views){

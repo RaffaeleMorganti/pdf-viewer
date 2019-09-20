@@ -19,8 +19,8 @@ To help you to understand how it works here a list of modified files in order to
 
 | Type | Path | Files |
 | --- | --- | --- |
-| JS |  ./pdfjs/ | viewer.js  |
-| HTML | ./ | index.html |
+| JS |  ./external/pdfjs/ | viewer.js  |
+| HTML | ./external/pdfjs/ | index.html |
 | ALL | ./pdf-turn/ | ***NEW*** |
 
 
