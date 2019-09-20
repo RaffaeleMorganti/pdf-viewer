@@ -170,9 +170,6 @@ function getViewerConfiguration() {
       scrollVerticalButton: document.getElementById('scrollVertical'),
       scrollHorizontalButton: document.getElementById('scrollHorizontal'),
       scrollWrappedButton: document.getElementById('scrollWrapped'),
-      //$FB: add flipbook button
-      bookFlipButton: document.getElementById('bookFlip'),
-	  
       spreadNoneButton: document.getElementById('spreadNone'),
       spreadOddButton: document.getElementById('spreadOdd'),
       spreadEvenButton: document.getElementById('spreadEven'),
@@ -1275,13 +1272,6 @@ var PDFViewerApplication = {
                   if (pageMode && sidebarView === _pdf_sidebar.SidebarView.UNKNOWN) {
                     sidebarView = apiPageModeToSidebarView(pageMode);
                   }
-                  //$FB: prevent start in bookflip mode
-                  if(scrollMode === _ui_utils.ScrollMode.FLIP) {
-                    scrollMode = _ui_utils.ScrollMode.VERTICAL;
-                    bookFlip.toStart = true;
-                    $('#viewer').css({ opacity: 0 });
-                  }
-				  
                   _this5.setInitialView(hash, {
                     rotation: rotation,
                     sidebarView: sidebarView,
@@ -10718,8 +10708,7 @@ function () {
         return;
       }
 
-      //$FB: bookflip need same handling as presentation mode for internal links
-      if (bookFlip.active || this.isInPresentationMode || !destArray) {
+      if (this.isInPresentationMode || !destArray) {
         this._setCurrentPageNumber(pageNumber, true);
 
         return;
@@ -12704,15 +12693,6 @@ function () {
       },
       close: true
     },
-    //$FB: add flipbook button
-    {
-      element: options.bookFlipButton,
-      eventName: 'switchscrollmode',
-      eventDetails: {
-        mode: _ui_utils.ScrollMode.FLIP
-      },
-      close: true
-    },
     {
       element: options.spreadNoneButton,
       eventName: 'switchspreadmode',
@@ -13851,8 +13831,7 @@ function getDefaultPreferences() {
       "enablePrintAutoRotate": false,
       "disablePageLabels": false,
       "historyUpdateUrl": false,
-      //$FB: from -1 (UNKNOWN) to 3 (FLIP) 
-      "scrollModeOnLoad": 3,
+      "scrollModeOnLoad": -1,
       "spreadModeOnLoad": -1
     });
   }
