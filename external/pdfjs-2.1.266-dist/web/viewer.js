@@ -170,6 +170,9 @@ function getViewerConfiguration() {
       scrollVerticalButton: document.getElementById('scrollVertical'),
       scrollHorizontalButton: document.getElementById('scrollHorizontal'),
       scrollWrappedButton: document.getElementById('scrollWrapped'),
+      //$FB: add flipbook button
+      bookFlipButton: document.getElementById('bookFlip'),
+
       spreadNoneButton: document.getElementById('spreadNone'),
       spreadOddButton: document.getElementById('spreadOdd'),
       spreadEvenButton: document.getElementById('spreadEven'),
@@ -12692,6 +12695,15 @@ function () {
       eventName: 'switchscrollmode',
       eventDetails: {
         mode: _ui_utils.ScrollMode.WRAPPED
+      },
+      close: true
+    },
+    //$FB: add flipbook button
+    {
+      element: options.bookFlipButton,
+      eventName: 'switchscrollmode',
+      eventDetails: {
+        mode: _ui_utils.ScrollMode.FLIP
       },
       close: true
     },
