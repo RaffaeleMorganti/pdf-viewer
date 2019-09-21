@@ -9,12 +9,14 @@ var bookFlip = {
 	_width: [],		//flipbook pages width
 	_height: [],	//flipbook pages height
 	active: false,	//flipbook mode on
-	__spread: NaN,	//spread mode backup to restore
+	_spreadBk: NaN,	//spread mode backup to restore
 	_evSpread: null,//spread mode changed default event handler
 	_spread: NaN,	//spread page mode
 	toStart: false,	//PDFjs require flipbook at start
-	onLoad: true,	//start PDFjs into flipbook mode 
+	onLoad: true,	//start PDFjs into flipbook mode
 	_intoView: null,//link handler default function
+	_visPages: null,//visible pages function
+	_ready: false,	//ready to start flipbook
 
 	// event listeners when bookFlip need different handling 
 	init: function(){
@@ -26,20 +28,24 @@ var bookFlip = {
 			bookFlip.insertAfter($('.secondaryToolbarButton.scrollModeButtons').last());
 		});
 		
-		$(document).on('rotationchanging', () => {bookFlip.rotate()});
-		$(document).on('scalechanging', () => {bookFlip.resize()});
-		$(document).on('pagechanging', () => {bookFlip.flip()});
-		$(document).on('documentloaded', () => {bookFlip.stop()});
-			
+		$(document).on('rotationchanging', () => {this.rotate()});
+		$(document).on('scalechanging', () => {this.resize()});
+		$(document).on('pagechanging', () => {this.flip()});
+		
+		$(document).on('documentinit', () => {
+			this.stop();
+			this._ready = false;
+		});
+
 		$(document).on('scrollmodechanged', () => {
 			var scroll = PDFViewerApplication.pdfViewer.scrollMode;
-			if (scroll === 3)bookFlip.start();
-			else bookFlip.stop();
+			if (scroll === 3)this.start();
+			else this.stop();
 			var button = PDFViewerApplication.appConfig.secondaryToolbar.bookFlipButton;
 			button.classList.toggle('toggled', scroll === 3);
 		});
 		
-		$(document).on('switchscrollmode',(evt)=>{
+		$(document).on('switchscrollmode',(evt) => {
 			var scroll = evt.originalEvent.detail.mode;
 			PDFViewerApplication.pdfViewer._scrollMode = scroll;
 			PDFViewerApplication.pdfViewer._updateScrollMode();
@@ -49,7 +55,7 @@ var bookFlip = {
 		});
 		
 		$(document).on('switchspreadmode', (evt) => {
-			bookFlip.spread(evt.originalEvent.detail.mode);
+			this.spread(evt.originalEvent.detail.mode);
 			PDFViewerApplication.eventBus.dispatch('spreadmodechanged', {
 				source: PDFViewerApplication,
 				mode: evt.originalEvent.detail.mode
@@ -57,17 +63,15 @@ var bookFlip = {
 		});
 		
 		$(document).on('pagesloaded', () => {
-			if(bookFlip.toStart){
-				bookFlip.toStart = false;
-				PDFViewerApplication.eventBus.dispatch('switchscrollmode', {
-					mode: 3
-				});
+			this._ready = true;
+			if(this.toStart){
+				this.toStart = false;
+				PDFViewerApplication.eventBus.dispatch('switchscrollmode', {mode: 3});
 				if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',3);
 			}
 		});
-
+		
 		$(document).on('documentloaded', () => {
-			//this._evScroll = PDFViewerApplication.eventBus._listeners.switchscrollmode;
 			PDFViewerApplication.eventBus._listeners.switchscrollmode = null;
 			
 			var scrollMode = PDFViewerApplicationOptions.get('scrollModeOnLoad');
@@ -84,6 +88,9 @@ var bookFlip = {
 
 		$(document).on('baseviewerinit', () => {
 			if(this.onLoad)PDFViewerApplicationOptions.set('scrollModeOnLoad',3);
+			
+			this._intoView = PDFViewerApplication.pdfViewer.scrollPageIntoView;
+			this._visPages = PDFViewerApplication.pdfViewer._getVisiblePages;
 			
 			var button = document.getElementById('bookFlip');
 			PDFViewerApplication.appConfig.secondaryToolbar['bookFlipButton'] = button;
@@ -115,58 +122,54 @@ var bookFlip = {
 	},
 	// startup flipbook
 	start: function(){
-		if(this.active)return;
+		if(this.active || !this._ready)return;
+		this.active = true;
 		
-		$('#viewer').css({ opacity: 1 });
+		var viewer = PDFViewerApplication.pdfViewer;
+		
 		$('.scrollModeButtons').removeClass('toggled');
-		$('#bookFlip').addClass('toggled');
 		
-		this.__spread = PDFViewerApplication.pdfViewer.spreadMode;
+		this._spreadBk = viewer.spreadMode;
 		var selected = $('.spreadModeButtons.toggled').attr('id');
-		this._spread = (this.__spread !== 2) ? 0 : 2;
-		PDFViewerApplication.pdfViewer.spreadMode = 0;
-		PDFViewerApplication.pdfViewer._spreadMode = -1;
-		
-		this._intoView = PDFViewerApplication.pdfViewer.scrollPageIntoView;
-		PDFViewerApplication.pdfViewer.scrollPageIntoView = (data) => {return bookFlip.link(data)};
-		
+		this._spread = (this._spreadBk !== 2) ? 0 : 2;
+		viewer.spreadMode = 0;
+		viewer._spreadMode = -1;
 		$('.spreadModeButtons').removeClass('toggled');
-		$('#' + selected).addClass('toggled');
+		$('#' + selected).addClass('toggled');	
 		
 		this._evSpread = PDFViewerApplication.eventBus._listeners.switchspreadmode;
 		PDFViewerApplication.eventBus._listeners.switchspreadmode = null;
 		
-		var scale = PDFViewerApplication.pdfViewer.currentScale;
+		viewer.scrollPageIntoView = (data) => {return this.link(data)};
+		viewer._getVisiblePages = () => {return this.load()};
 		
+		var scale = viewer.currentScale;
 		var parent = this;
 		$('#viewer .page').each(function(){
 			parent._width[$(this).attr('data-page-number')] = $(this).width() / scale;
 			parent._height[$(this).attr('data-page-number')] = $(this).height() / scale;
 		});
 		
-		$('#viewer').removeClass('pdfViewer');
-		$('#viewer').addClass('bookViewer');
-		$('#spreadOdd').attr('disabled','');
+		$('#viewer').removeClass('pdfViewer').addClass('bookViewer').css({ opacity: 1 });;
 		
+		$('#spreadOdd').prop('disabled', true);
 		var pages = PDFViewerApplication.pagesCount;
 		for(var page = 3; page < pages + (pages%2); page ++){
 			if(this._height[page]!=this._height[page-1] || this._width[page]!=this._width[page-1]){
-				$('#spreadEven').attr('disabled','');
+				$('#spreadEven').prop('disabled', true);
 				this._spread = 0;
 			}
 		}
 		
-		this.active = true;
-		
 		$('#viewer').turn({
 			elevation: 50,
-			width:  this._width[PDFViewerApplication.page] * this._spreadMult() * scale,
-			height: this._height[PDFViewerApplication.page] * scale,
+			width:  this._size(PDFViewerApplication.page,'width') * this._spreadMult(),
+			height: this._size(PDFViewerApplication.page,'height'),
 			page: PDFViewerApplication.page,
 			when: {
 				turned: function(event, page) { 
 					PDFViewerApplication.page = page;
-					PDFViewerApplication.pdfViewer.update();
+					viewer.update();
 				}
 			},
 			display: this._spreadType()
@@ -177,36 +180,31 @@ var bookFlip = {
 		if(!this.active)return;
 		this.active = false;
 		
-		$('#bookFlip').removeClass('toggled');
-		
-		var scale = PDFViewerApplication.pdfViewer.currentScale;
+		var viewer = PDFViewerApplication.pdfViewer;
 		
 		$('#viewer').turn('destroy');
-		$('#viewer').removeAttr('style');
+		
+		viewer.scrollPageIntoView = this._intoView;
+		viewer._getVisiblePages = this._visPages;
 		
 		PDFViewerApplication.eventBus._listeners.switchspreadmode = this._evSpread;
-		PDFViewerApplication.pdfViewer.spreadMode = this.__spread;
-		
-		PDFViewerApplication.pdfViewer.scrollPageIntoView = this._intoView;
+		viewer.spreadMode = this._spreadBk;
 		
 		$('#viewer .page').removeAttr('style');
-		$('#viewer').removeClass('shadow');
-		$('#viewer').addClass('pdfViewer');
-		$('#viewer').removeClass('bookViewer');
+		$('#viewer').removeAttr('style').removeClass('shadow bookViewer').addClass('pdfViewer');
 		
 		var parent = this;
 		$('#viewer .page').each(function(){
 			var page = $(this).attr('data-page-number');
-			$(this).css( 'width', parent._width[page] * scale).css( 'height', parent._height[page] * scale);
+			$(this).css( 'width', parent._size(page,'width')).css( 'height', parent._size(page,'height'));
 		});
 		
 	},
 	// resize flipbook pages
 	resize: function(){
 		if(!this.active)return;
-		var scale = PDFViewerApplication.pdfViewer.currentScale;
 		var page = PDFViewerApplication.page;
-		$('#viewer').turn('size', this._width[page] * this._spreadMult() * scale, this._height[page] * scale);
+		$('#viewer').turn('size', this._size(page,'width') * this._spreadMult(), this._size(page,'height'));
 	},
 	// rotate flipbook pages
 	rotate: function(){
@@ -225,9 +223,7 @@ var bookFlip = {
 	flip: function(){
 		if(!this.active)return;
 		$('#viewer').turn('page', PDFViewerApplication.page);
-		if(!PDFViewerApplication.pdfViewer.hasEqualPageSizes){
-			this.resize();
-		}
+		if(!PDFViewerApplication.pdfViewer.hasEqualPageSizes)this.resize();
 	},
 	// follow internal links
 	link: function(data){
@@ -235,27 +231,35 @@ var bookFlip = {
 		PDFViewerApplication.page = data.pageNumber;
 	},
 	// load pages near shown page
-	load: function(views){
+	load: function(){
+		if(!this.active)return;
+		var views = PDFViewerApplication.pdfViewer._pages;
 		var arr = [];
 		var page = PDFViewerApplication.page;
-		var min = (this._spread === 0) ? 2 : (page%2) ? 4 : 3;
-		var max = (this._spread === 0) ? 1 : (page%2) ? 2 : 3;
-		for (var i = Math.max(page - min,0), ii = Math.min(page + max, views.length); i < ii; i++) {
+		var min = Math.max(page - ((this._spread === 0) ? 2 : 3 + (page%2)), 0);
+		var max = Math.min(page + ((this._spread === 0) ? 1 : 3 - (page%2)), views.length);
+		
+		for (var i = min, ii = max; i < ii; i++) {
 			arr.push({
 				id: views[i].id,
-				x: views[i].div.offsetLeft + views[i].div.clientLeft,
-				y: views[i].div.offsetTop + views[i].div.clientTop,
 				view: views[i],
-				percent: 100
+				x: 0, y: 0, percent: 100
 			});
 		}
-		return arr;
+
+		return { first:arr[page - min - 1], last:arr[arr.length-1], views:arr };
 	},
 	_spreadType: function(){
 		return (this._spread === 0) ? 'single' : 'double';
 	},
 	_spreadMult: function(){
 		return (this._spread === 0) ? 1 : 2;
+	},
+	_size: function(page,request){
+		var size;
+		if (request === 'width') size = this._width[page];
+		if (request === 'height') size = this._height[page];
+		return size * PDFViewerApplication.pdfViewer.currentScale;
 	}
 };
 
