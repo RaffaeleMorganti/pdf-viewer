@@ -11,13 +11,7 @@
 
 'use strict';
 
-var has3d,
-  
-  hasRot,
-
-  vendor = '',
-  
-  version = '4.1.0',
+var version = '4.1.0',
 
   PI = Math.PI,
 
@@ -115,10 +109,6 @@ turnMethods = {
   init: function(options) {
 
     // Define constants
-    
-    has3d = 'WebKitCSSMatrix' in window || 'MozPerspective' in document.body.style;
-    hasRot = rotationAvailable();
-    vendor = getPrefix();
 
     var i, that = this, pageNum = 0, data = this.data(), ch = this.children();
 
@@ -153,7 +143,7 @@ turnMethods = {
     if (options.when)
       for (i in options.when)
         if (has(i, options.when))
-          this.bind(i, options.when[i]);
+          this.on(i, options.when[i]);
 
     // Set the css
 
@@ -171,7 +161,7 @@ turnMethods = {
     // Prevent blue screen problems of switching to hardware acceleration mode
     // By forcing hardware acceleration for ever
 
-    if (has3d && !isTouch && options.acceleration)
+    if (!isTouch && options.acceleration)
       this.transform(translate(0, 0, true));
 
     // Add pages from the DOM
@@ -184,16 +174,16 @@ turnMethods = {
 
     // Event listeners
 
-    $(this).bind(mouseEvents.down, data.eventHandlers.touchStart).
-      bind('end', turnMethods._eventEnd).
-      bind('pressed', turnMethods._eventPressed).
-      bind('released', turnMethods._eventReleased).
-      bind('flip', turnMethods._flip);
+    $(this).on(mouseEvents.down, data.eventHandlers.touchStart).
+      on('end', turnMethods._eventEnd).
+      on('pressed', turnMethods._eventPressed).
+      on('released', turnMethods._eventReleased).
+      on('flip', turnMethods._flip);
 
-    $(this).parent().bind('start', data.eventHandlers.start);
+    $(this).parent().on('start', data.eventHandlers.start);
 
-    $(document).bind(mouseEvents.move, data.eventHandlers.touchMove).
-      bind(mouseEvents.up, data.eventHandlers.touchEnd);
+    $(document).on(mouseEvents.move, data.eventHandlers.touchMove).
+      on(mouseEvents.up, data.eventHandlers.touchEnd);
 
     // Set the initial page
 
@@ -262,7 +252,7 @@ turnMethods = {
         css({'float': 'left'}).
         addClass('page p' + page + className);
 
-      if (!hasHardPage() &&  data.pageObjs[page].hasClass('hard')) {
+      if (data.pageObjs[page].hasClass('hard')) {
         data.pageObjs[page].removeClass('hard');
       }
 
@@ -392,13 +382,13 @@ turnMethods = {
     data.destroying = true;
 
     $.each(events, function(index, eventName) {
-      flipbook.unbind(eventName);
+      flipbook.off(eventName);
     });
 
-    this.parent().unbind('start', data.eventHandlers.start);
+    this.parent().off('start', data.eventHandlers.start);
 
-    $(document).unbind(mouseEvents.move, data.eventHandlers.touchMove).
-      unbind(mouseEvents.up, data.eventHandlers.touchEnd);
+    $(document).off(mouseEvents.move, data.eventHandlers.touchMove).
+      off(mouseEvents.up, data.eventHandlers.touchEnd);
     
     while (data.totalPages!==0) {
       this.turn('removePage', data.totalPages);
@@ -1852,8 +1842,8 @@ turnMethods = {
       if (options.when)
         for (var eventName in options.when)
           if (has(eventName, options.when)) {
-            this.unbind(eventName).
-              bind(eventName, options.when[eventName]);
+            this.off(eventName).
+              on(eventName, options.when[eventName]);
           }
 
       return this;
@@ -2184,8 +2174,8 @@ flipMethods = {
       case 'hard':
         
         var cssProperties = {};
-        cssProperties[vendor + 'transform-style'] = 'preserve-3d';
-        cssProperties[vendor + 'backface-visibility'] = 'hidden';
+        cssProperties['transform-style'] = 'preserve-3d';
+        cssProperties['backface-visibility'] = 'hidden';
 
         data.wrapper = $('<div/>', divAtt(0, 0, 2)).
           css(cssProperties).
@@ -2319,7 +2309,7 @@ flipMethods = {
           break;
         }
 
-        parentCss[vendor+'perspective-origin'] = parentOrigin;
+        parentCss['perspective-origin'] = parentOrigin;
 
         data.wrapper.transform('rotateY('+angle+'deg)' +
           'translate3d(0px, 0px, '+(this.attr('depth')||0)+'px)', parentOrigin);
@@ -2398,12 +2388,7 @@ flipMethods = {
         var middle = point2D(0, 0);
 
         rel.x = (o.x) ? o.x - point.x : point.x;
-
-        if (!hasRot) {
-          rel.y = 0;
-        } else {
-          rel.y = (o.y) ? o.y - point.y : point.y;
-        }
+        rel.y = (o.y) ? o.y - point.y : point.y;
 
         middle.x = (left)? width - rel.x/2 : point.x + rel.x/2;
         middle.y = rel.y/2;
@@ -3068,24 +3053,11 @@ function point2D(x, y) {
 
 }
 
-// Webkit 534.3 on Android wrongly repaints elements that use overflow:hidden + rotation
-
-function rotationAvailable() {
-  var parts;
-
-  if ((parts = /AppleWebkit\/([0-9\.]+)/i.exec(navigator.userAgent))) {
-    var webkitVersion = parseFloat(parts[1]);
-    return (webkitVersion>534.3);
-  } else {
-    return true;
-  }
-}
-
 // Returns the traslate value
 
 function translate(x, y, use3d) {
   
-  return (has3d && use3d) ? ' translate3d(' + x + 'px,' + y + 'px, 0px) '
+  return (use3d) ? ' translate3d(' + x + 'px,' + y + 'px, 0px) '
   : ' translate(' + x + 'px, ' + y + 'px) ';
 
 }
@@ -3106,84 +3078,31 @@ function has(property, object) {
 
 }
 
-// Gets the CSS3 vendor prefix
-
-function getPrefix() {
-
-  var vendorPrefixes = ['Moz','Webkit','Khtml','O','ms'],
-  len = vendorPrefixes.length,
-  vendor = '';
-
-  while (len--)
-    if ((vendorPrefixes[len] + 'Transform') in document.body.style)
-      vendor='-'+vendorPrefixes[len].toLowerCase()+'-';
-
-  return vendor;
-
-}
-
-// Detects the transitionEnd Event
-
-function getTransitionEnd() {
-
-  var t,
-    el = document.createElement('fakeelement'),
-    transitions = {
-      'transition':'transitionend',
-      'OTransition':'oTransitionEnd',
-      'MSTransition':'transitionend',
-      'MozTransition':'transitionend',
-      'WebkitTransition':'webkitTransitionEnd'
-    };
-
-  for (t in transitions) {
-    if (el.style[t] !== undefined) {
-      return transitions[t];
-    }
-  }
-}
-
 // Gradients
 
 function gradient(obj, p0, p1, colors, numColors) {
 
   var j, cols = [];
-
-  if (vendor=='-webkit-') {
-
-    for (j = 0; j<numColors; j++)
-      cols.push('color-stop('+colors[j][0]+', '+colors[j][1]+')');
-    
-    obj.css({'background-image':
-        '-webkit-gradient(linear, '+
-        p0.x+'% '+
-        p0.y+'%,'+
-        p1.x+'% '+
-        p1.y+'%, '+
-        cols.join(',') + ' )'});
-  } else {
-    
     p0 = {x:p0.x/100 * obj.width(), y:p0.y/100 * obj.height()};
     p1 = {x:p1.x/100 * obj.width(), y:p1.y/100 * obj.height()};
 
-    var dx = p1.x-p0.x,
-      dy = p1.y-p0.y,
-      angle = Math.atan2(dy, dx),
-      angle2 = angle - Math.PI/2,
-      diagonal = Math.abs(obj.width()*Math.sin(angle2))+Math.abs(obj.height()*Math.cos(angle2)),
-      gradientDiagonal = Math.sqrt(dy*dy + dx*dx),
-      corner = point2D((p1.x<p0.x) ? obj.width() : 0, (p1.y<p0.y) ? obj.height() : 0),
-      slope = Math.tan(angle),
-      inverse = -1/slope,
-      x = (inverse*corner.x - corner.y - slope*p0.x + p0.y)/(inverse-slope),
-      c = {x: x, y: inverse*x - inverse*corner.x + corner.y},
-      segA = (Math.sqrt( Math.pow(c.x-p0.x,2) + Math.pow(c.y-p0.y,2)));
+  var dx = p1.x-p0.x,
+    dy = p1.y-p0.y,
+    angle = Math.atan2(dy, dx),
+    angle2 = angle - Math.PI/2,
+    diagonal = Math.abs(obj.width()*Math.sin(angle2))+Math.abs(obj.height()*Math.cos(angle2)),
+    gradientDiagonal = Math.sqrt(dy*dy + dx*dx),
+    corner = point2D((p1.x<p0.x) ? obj.width() : 0, (p1.y<p0.y) ? obj.height() : 0),
+    slope = Math.tan(angle),
+    inverse = -1/slope,
+    x = (inverse*corner.x - corner.y - slope*p0.x + p0.y)/(inverse-slope),
+    c = {x: x, y: inverse*x - inverse*corner.x + corner.y},
+    segA = (Math.sqrt( Math.pow(c.x-p0.x,2) + Math.pow(c.y-p0.y,2)));
 
-      for (j = 0; j<numColors; j++)
-        cols.push(' '+colors[j][1]+' '+((segA + gradientDiagonal*colors[j][0])*100/diagonal)+'%');
+  for (j = 0; j<numColors; j++)
+    cols.push(' '+colors[j][1]+' '+((segA + gradientDiagonal*colors[j][0])*100/diagonal)+'%');
 
-      obj.css({'background-image': vendor+'linear-gradient(' + (-angle) + 'rad,' + cols.join(',') + ')'});
-  }
+  obj.css({'background-image': '-webkit-linear-gradient(' + (-angle) + 'rad,' + cols.join(',') + ')'});
 }
 
 
@@ -3231,27 +3150,6 @@ function findPos(obj) {
 
 }
 
-// Checks if there's hard page compatibility
-// IE9 is the only browser that does not support hard pages
-
-function hasHardPage() {
-  return (navigator.userAgent.indexOf('MSIE 9.0')==-1);
-}
-
-// Request an animation
-
-window.requestAnim = (function() {
-  return window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
-    function(callback) {
-      window.setTimeout(callback, 1000 / 60);
-    };
-
-})();
-
 // Extend $.fn
 
 $.extend($.fn, {
@@ -3269,9 +3167,9 @@ $.extend($.fn, {
     var properties = {};
     
     if (origin)
-      properties[vendor+'transform-origin'] = origin;
+      properties['transform-origin'] = origin;
     
-    properties[vendor+'transform'] = transform;
+    properties['transform'] = transform;
   
     return this.css(properties);
 
@@ -3313,7 +3211,7 @@ $.extend($.fn, {
             if (point.complete)
               point.complete();
           } else {
-            window.requestAnim(frame);
+            window.requestAnimationFrame(frame);
           }
         };
 
@@ -3345,8 +3243,6 @@ $.extend($.fn, {
 
 $.isTouch = isTouch;
 $.mouseEvents = mouseEvents;
-$.cssPrefix = getPrefix;
-$.cssTransitionEnd = getTransitionEnd;
 $.findPos = findPos;
 
 })(jQuery);
