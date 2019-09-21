@@ -130,10 +130,10 @@ turnMethods = {
     data.zoom = 1;
     data.totalPages = options.pages || 0;
     data.eventHandlers = {
-      touchStart: $.proxy(turnMethods._touchStart, this),
-      touchMove: $.proxy(turnMethods._touchMove, this),
-      touchEnd: $.proxy(turnMethods._touchEnd, this),
-      start: $.proxy(turnMethods._eventStart, this)
+      touchStart: turnMethods._touchStart.bind(this),
+      touchMove: turnMethods._touchMove.bind(this),
+      touchEnd: turnMethods._touchEnd.bind(this),
+      start: turnMethods._eventStart.bind(this)
     };
 
 
@@ -803,7 +803,7 @@ turnMethods = {
 
     } else {
 
-      if ($.inArray(display, displays)==-1)
+      if (displays.indexOf(display)==-1)
         throw turnError('"'+display + '" is not a value for display');
       
       switch(display) {
@@ -869,7 +869,7 @@ turnMethods = {
 
       dir = dir.toLowerCase();
 
-      if ($.inArray(dir, directions)==-1)
+      if (directions.indexOf(dir)==-1)
         throw turnError('"' + dir + '" is not a value for direction');
 
       if (dir=='rtl') {
@@ -934,7 +934,7 @@ turnMethods = {
     for (page in data.pages) {
       if (has(page, data.pages))
         data.pages[page].flip('disable',
-          (data.disabled) ? true : $.inArray(parseInt(page, 10), view)==-1);
+          (data.disabled) ? true : view.indexOf(parseInt(page, 10))==-1);
     }
 
     return this;
@@ -1220,16 +1220,16 @@ turnMethods = {
 
       if (trigger('turning', this, [page, newView])=='prevented') {
 
-        if (currentPage==data.page && $.inArray(place, data.pageMv)!=-1)
+        if (currentPage==data.page && data.pageMv.indexOf(place)!=-1)
           data.pages[place].flip('hideFoldedPage', true);
         
         return;
 
       }
 
-      if ($.inArray(1, newView)!=-1)
+      if (newView.indexOf(1)!=-1)
         this.trigger('first');
-      if ($.inArray(data.totalPages, newView)!=-1)
+      if (newView.indexOf(data.totalPages)!=-1)
         this.trigger('last');
 
     }
@@ -1309,7 +1309,7 @@ turnMethods = {
         if (page>0 && page<=data.totalPages) {
 
           if (page!=data.page) {
-            if (!data.done || $.inArray(page, this.turn('view'))!=-1)
+            if (!data.done || this.turn('view').indexOf(page)!=-1)
               turnMethods._fitPage.call(this, page);
             else
               turnMethods._turnPage.call(this, page);
@@ -1648,7 +1648,7 @@ turnMethods = {
 
             p.flip('hover', false).
               flip('disable',
-                $.inArray(parseInt(page, 10), data.pageMv)==-1 &&
+                data.pageMv.indexOf(parseInt(page, 10))==-1 &&
                 page!=newView[0] &&
                 page!=newView[1]);
 
@@ -2000,7 +2000,7 @@ flipMethods = {
         break;
       }
 
-    return (!point.corner || $.inArray(point.corner, allowedCorners)==-1) ?
+    return (!point.corner || allowedCorners.indexOf(point.corner)==-1) ?
       false : point;
 
   },
@@ -2953,10 +2953,10 @@ flipMethods = {
 
     if (corner) {
 
-      if ($.inArray(corner, corners.all)==-1)
+      if (corners.all.indexOf(corner)==-1)
         throw turnError('Corner '+corner+' is not permitted');
 
-      if ($.inArray(corner, flipMethods._cAllowed.call(this))!=-1) {
+      if (flipMethods._cAllowed.call(this).indexOf(corner)!=-1) {
 
         var point = flipMethods._c.call(this, corner, data.opts.cornerSize/2);
         

@@ -46,7 +46,7 @@ var bookFlip = {
 		});
 		
 		$(document).on('switchscrollmode',(evt) => {
-			var scroll = evt.originalEvent.detail.mode;
+			var scroll = evt.detail.mode;
 			PDFViewerApplication.pdfViewer._scrollMode = scroll;
 			PDFViewerApplication.pdfViewer._updateScrollMode();
 				PDFViewerApplication.eventBus.dispatch('scrollmodechanged', {
@@ -55,10 +55,10 @@ var bookFlip = {
 		});
 		
 		$(document).on('switchspreadmode', (evt) => {
-			this.spread(evt.originalEvent.detail.mode);
+			this.spread(evt.detail.mode);
 			PDFViewerApplication.eventBus.dispatch('spreadmodechanged', {
 				source: PDFViewerApplication,
-				mode: evt.originalEvent.detail.mode
+				mode: evt.detail.mode
 			});
 		});
 		
