@@ -9,9 +9,9 @@ var bookFlip = {
 	_width: [],		//flipbook pages width
 	_height: [],	//flipbook pages height
 	active: true,	//flipbook mode on
-	_spreadBk: 2,	//spread mode backup to restore
+	_spreadBk: NaN,	//spread mode backup to restore
 	_evSpread: null,//spread mode changed default event handler 
-	_spread: 2,	//spread page mode
+	_spread: NaN,	//spread page mode
 	toStart: false,	//PDFjs require flipbook at start
 	_intoView: null,//link handler default function
 	_visPages: null,//visible pages function
